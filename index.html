@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ऑल-इन-वन बधाई कार्ड</title>
+    <title>स्मार्ट जादुई कार्ड</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { 
@@ -11,10 +11,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px;
         }
         .container { max-width: 500px; margin: auto; }
-        
-        /* कार्ड डिजाइन */
         .card-wrapper { padding: 5px; border-radius: 35px; margin-top: 20px; background: transparent; }
-        
         .card {
             padding: 30px; border-radius: 30px; min-height: 520px;
             display: flex; flex-direction: column; justify-content: center;
@@ -22,30 +19,20 @@
             box-shadow: 0 20px 45px rgba(0,0,0,0.7);
             position: relative; transition: 0.5s;
         }
-
         #userPhoto {
             width: 145px; height: 145px; border-radius: 50%;
             border: 5px solid gold; object-fit: cover;
             margin: 0 auto 15px; display: none;
             box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
         }
-
         h1 { font-size: 30px; margin: 10px 0; text-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
         .shayari { font-size: 20px; line-height: 1.6; margin: 15px 0; font-weight: bold; }
         .wishes { font-size: 16px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 15px; margin: 10px 0; }
         .sender { font-size: 15px; margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3); font-weight: bold; }
-
-        /* फॉर्म और बटन */
         .controls { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); }
         input, select, button { width: 95%; padding: 14px; margin: 8px 0; border-radius: 12px; border: none; font-size: 16px; }
-        
         #photoInput { display: none; }
-        .custom-file-upload {
-            display: inline-block; width: 88%; padding: 14px;
-            background: #3498db; color: white; border-radius: 12px;
-            cursor: pointer; font-weight: bold; margin: 8px 0;
-        }
-
+        .custom-file-upload { display: inline-block; width: 88%; padding: 14px; background: #3498db; color: white; border-radius: 12px; cursor: pointer; font-weight: bold; margin: 8px 0; }
         .gen-btn { background: #ff4757; color: white; font-weight: bold; cursor: pointer; }
         .share-btn { background: #2ed573; color: white; font-weight: bold; display: none; margin-bottom: 50px; cursor: pointer; }
     </style>
@@ -74,7 +61,6 @@
             <optgroup label="Valentine's Special ❤️">
                 <option value="Valentine">वैलेंटाइन डे (Valentine's Day)</option>
                 <option value="RoseDay">रोज डे (Rose Day)</option>
-                <option value="ProposeDay">प्रपोज डे (Propose Day)</option>
                 <option value="KissDay">किस डे (Kiss Day)</option>
                 <option value="HugDay">हग डे (Hug Day)</option>
             </optgroup>
@@ -101,6 +87,75 @@
 </div>
 
 <script>
+    // शायरियों का खजाना (Database)
+    const shayariData = {
+        Holi: [
+            "रंगों की बौछार, अपनों का प्यार, मुबारक हो आपको होली का त्योहार!",
+            "लाल गुलाबी रंग है, झूम रहा संसार, सूरज की किरणें खुशियों की बहार!",
+            "पिचकारी की धार, गुलाल की बौछार, अपनों का प्यार, यही है होली का त्योहार!"
+        ],
+        Diwali: [
+            "जगमग दीपों की चमक से रोशन हो संसार, मुबारक हो आपको दिवाली का त्योहार!",
+            "दीयों की रोशनी से झिलमिलाता आंगन हो, खुशियों से भरा आपका जीवन हो!",
+            "सुख-समृद्धि लाए आपके घर दिवाली का त्योहार, हर तरफ खुशियां हों और अपनों का प्यार!"
+        ],
+        Birthday: [
+            "सूरज रोशनी लेकर आया, चिड़ियों ने गाना गाया, मुबारक हो आपका जन्मदिन आया!",
+            "दुआ है मेरी रब से कि आप सदा मुस्कुराएं, खुशियां आपके कदम चूमें और आप सदा चमकें!",
+            "फूलों ने अमृत का जाम भेजा है, सूरज ने गगन से सलाम भेजा है, जन्मदिन की बधाई!"
+        ],
+        Valentine: [
+            "धड़कन मेरी तुमसे है, खुशबू मेरी तुमसे है, मेरी हर खुशी तुमसे है!",
+            "तुम्हारी सादगी का क्या जवाब दूं, तुम एक खूबसूरत एहसास हो मेरे लिए!",
+            "मोहब्बत का कोई रंग नहीं होता, फिर भी ये जिंदगी को रंगीन बना देती है!"
+        ],
+        MahaShivratri: [
+            "शिव की शक्ति, शिव की भक्ति, खुशियां लाए आपके जीवन में सुख-शांति!",
+            "बम बम भोले, गूंज रहा है संसार, मुबारक हो आपको शिवरात्रि का त्योहार!",
+            "भोले की भक्ति में खो जाओ, शांति और सुख का वरदान पाओ!"
+        ],
+        Janmashtami: [
+            "माखन चोर नन्द किशोर, बांधी जिसने प्रीत की डोर, जय श्री कृष्णा!",
+            "मिश्री की मिठास, माखन का स्वाद, जन्माष्टमी लाए आपके जीवन में ढेर सारा प्यार!",
+            "नन्द के घर आनंद भयो, जय कन्हैया लाल की!"
+        ],
+        NewYear: [
+            "बीते साल को विदा करें, नए का करें स्वागत, दुआ है रब से आप रहें सलामत!",
+            "नया साल लाए आपके लिए खुशियों की सौगात, मुबारक हो आपको सुनहरी सुबह और प्यारी रात!",
+            "इस नए साल में आपकी हर दुआ पूरी हो, गम आपसे कोसों दूर रहे!"
+        ],
+        Anniversary: [
+            "ये रिश्ता बना रहे जन्म-जन्म तक, खुशियां बिखरी रहें आपकी राहों में हर पल तक!",
+            "मुबारक हो आपको शादी की सालगिरह, सलामत रहे आपका साथ और बढ़ता रहे प्यार!",
+            "दुआ है रब से आप दोनों की जोड़ी सदा बनी रहे, प्यार का ये रिश्ता सदा खिलता रहे!"
+        ],
+        RoseDay: [
+            "फूल बनकर मुस्कुराना जिंदगी है, मुस्कुरा के गम भुलाना जिंदगी है!",
+            "मेरे ख्यालों का गुलाब हो तुम, मेरी धड़कनों का हिसाब हो तुम!",
+            "रिश्तों की खूबसूरती महकती रहे, जैसे फूलों की महक सदा बनी रहे!"
+        ],
+        KissDay: [
+            "कभी खामोशी को भी महसूस करो, लबों की परछाइयों में प्यार ढूंढो!",
+            "बातें तो होती रहती हैं दिल की गहराइयों में, कुछ पल चुरा लो खामोश तन्हाइयों में!",
+            "मोहब्बत का पैगाम है लबों की ये बात, मुबारक हो आपको ये प्यारा सा साथ!"
+        ],
+        HugDay: [
+            "एक जादू की झप्पी दे दो हमें, सारी दूरियां मिटा दो तुम!",
+            "बाहों में भरकर तुम्हें गम भुलाना चाहते हैं, दिल की हर धड़कन को पास लाना चाहते हैं!",
+            "सुकून मिलता है तुम्हारी बाहों में आकर, जैसे मिल गई मंजिल सफर में आकर!"
+        ],
+        ProposeDay: [
+            "दिल की बात लबों पर लाना चाहते हैं, तुम्हें अपना बनाना चाहते हैं!",
+            "मेरे दिल की हर धड़कन सिर्फ तुम्हारा नाम लेती है, क्या तुम मेरा साथ दोगे?",
+            "तुम्हारे साथ बिताया हर लम्हा खास है, क्या तुम हमेशा मेरे पास रहोगे?"
+        ],
+        RakshaBandhan: [
+            "कच्चे धागों से बनी पक्की डोर है राखी, प्यार और विश्वास की मिसाल है राखी!",
+            "भाई-बहन का प्यार है निराला, रक्षाबंधन का ये धागा है बड़ा प्यारा!",
+            "दुआ है मेरी कि ये रिश्ता सदा बना रहे, खुशियों से भरा आपका संसार रहे!"
+        ]
+    };
+
     const photoInput = document.getElementById('photoInput');
     const userPhoto = document.getElementById('userPhoto');
 
@@ -131,58 +186,67 @@
 
         senderDiv.innerHTML = "प्रेषक: " + from + " जी";
 
-        // त्योहारों के हिसाब से डिजाइन
+        // रैंडम शायरी चुनना (Pick a random shayari from array)
+        let shayaris = shayariData[fest] || ["मुबारक हो आपको ये खास दिन!"];
+        let randomShayari = shayaris[Math.floor(Math.random() * shayaris.length)];
+        shayariP.innerHTML = randomShayari;
+
+        // डिजाइन सेटिंग्स (Colors & Icons)
         if (fest === "Holi") {
             card.style.background = "linear-gradient(45deg, #ff4757, #ff9f43, #feca57)";
             wishH1.innerText = "हैप्पी होली, " + toName;
-            shayariP.innerHTML = "रंगों की बौछार, अपनों का प्यार,<br>मुबारक हो आपको होली का त्योहार!";
             iconDiv.innerText = "🎨🌈";
         } else if (fest === "Diwali") {
             card.style.background = "radial-gradient(circle, #2c3e50, #000000)";
             card.style.color = "#f1c40f";
             wishH1.innerText = "शुभ दीपावली, " + toName;
-            shayariP.innerHTML = "जगमग दीपों की चमक से रोशन हो संसार,<br>सुख-समृद्धि लाए आपके घर दिवाली का त्योहार!";
             iconDiv.innerText = "🪔✨";
+        } else if (fest === "Birthday") {
+            card.style.background = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+            card.style.color = "#fff";
+            wishH1.innerText = "जन्मदिन मुबारक, " + toName;
+            iconDiv.innerText = "🎂🎈";
+        } else if (fest === "Valentine") {
+            card.style.background = "linear-gradient(to top, #ff0844 0%, #ffb199 100%)";
+            card.style.color = "#fff";
+            wishH1.innerText = "Happy Valentine's, " + toName;
+            iconDiv.innerText = "❤️🌹";
         } else if (fest === "MahaShivratri") {
             card.style.background = "linear-gradient(135deg, #2c3e50, #4ca1af)";
             wishH1.innerText = "हर हर महादेव, " + toName;
-            shayariP.innerHTML = "शिव की शक्ति, शिव की भक्ति,<br>खुशियां लाए आपके जीवन में सुख-शांति!";
             iconDiv.innerText = "🔱🕉️";
         } else if (fest === "Janmashtami") {
             card.style.background = "linear-gradient(to right, #000428, #004e92)";
             wishH1.innerText = "जय श्री कृष्णा, " + toName;
-            shayariP.innerHTML = "माखन चोर नन्द किशोर, बांधी जिसने प्रीत की डोर,<br>हरे कृष्ण हरे मुरारी, पूजती जिन्हें दुनिया सारी!";
             iconDiv.innerText = "🪈🍶";
-        } else if (fest === "RakshaBandhan") {
-            card.style.background = "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)";
-            wishH1.innerText = "हैप्पी रक्षाबंधन, " + toName;
-            shayariP.innerHTML = "कच्चे धागों से बनी पक्की डोर है राखी,<br>प्यार और विश्वास की मिसाल है राखी!";
-            iconDiv.innerText = "🎁👫";
-        } else if (fest === "Birthday") {
-            card.style.background = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
-            wishH1.innerText = "जन्मदिन मुबारक, " + toName;
-            shayariP.innerHTML = "सूरज रोशनी लेकर आया, चिड़ियों ने गाना गाया,<br>फूलों ने हंस-हंसकर बोला, मुबारक हो आपका जन्मदिन आया!";
-            iconDiv.innerText = "🎂🎈";
-        } else if (fest === "Valentine") {
+        } else if (fest === "Anniversary") {
             card.style.background = "linear-gradient(to top, #ff0844 0%, #ffb199 100%)";
-            wishH1.innerText = "Happy Valentine's Day, " + toName;
-            shayariP.innerHTML = "धड़कन मेरी तुमसे है, खुशबू मेरी तुमसे है,<br>कैसे कहें तुमसे, मेरी हर खुशी तुमसे है!";
-            iconDiv.innerText = "❤️🌹";
-        } else if (fest === "KissDay") {
-            card.style.background = "linear-gradient(135deg, #e91e63, #880e4f)";
-            wishH1.innerText = "Happy Kiss Day, " + toName;
-            shayariP.innerHTML = "बातें तो होती रहती हैं दिल की गहराइयों में,<br>कभी खामोशी को भी महसूस करो लबों की परछाइयों में!";
-            iconDiv.innerText = "💋✨";
+            wishH1.innerText = "सालगिरह मुबारक, " + toName;
+            iconDiv.innerText = "💖💍";
         } else if (fest === "RoseDay") {
             card.style.background = "linear-gradient(45deg, #d4145a, #fbb03b)";
             wishH1.innerText = "Happy Rose Day, " + toName;
-            shayariP.innerHTML = "फूल बनकर मुस्कुराना जिंदगी है,<br>मुस्कुरा के गम भुलाना जिंदगी है!";
             iconDiv.innerText = "🌹🥰";
+        } else if (fest === "KissDay") {
+            card.style.background = "linear-gradient(135deg, #e91e63, #880e4f)";
+            wishH1.innerText = "Happy Kiss Day, " + toName;
+            iconDiv.innerText = "💋✨";
+        } else if (fest === "HugDay") {
+            card.style.background = "linear-gradient(135deg, #3498db, #2c3e50)";
+            wishH1.innerText = "Happy Hug Day, " + toName;
+            iconDiv.innerText = "🤗💕";
+        } else if (fest === "ProposeDay") {
+            card.style.background = "linear-gradient(135deg, #ff9a9e, #fecfef)";
+            card.style.color = "#d81b60";
+            wishH1.innerText = "Happy Propose Day, " + toName;
+            iconDiv.innerText = "💍💝";
+        } else if (fest === "RakshaBandhan") {
+            card.style.background = "linear-gradient(135deg, #f093fb, #f5576c)";
+            wishH1.innerText = "हैप्पी रक्षाबंधन, " + toName;
+            iconDiv.innerText = "🎁👫";
         } else {
-            // Default New Year
             card.style.background = "linear-gradient(135deg, #1e3c72, #2a5298)";
             wishH1.innerText = "हैप्पी न्यू ईयर, " + toName;
-            shayariP.innerHTML = "बीते साल को विदा करें, नए का करें स्वागत,<br>दुआ है रब से, आप हमेशा रहें सलामत!";
             iconDiv.innerText = "🎆🎆";
         }
 
@@ -200,7 +264,7 @@
             link.download = 'MagicCard.png';
             link.href = canvas.toDataURL("image/png");
             link.click();
-            alert("कार्ड सेव हो गया! अब आप इसे WhatsApp पर ममता जी या किसी को भी भेज सकते हैं।");
+            alert("कार्ड सेव हो गया! जितनी बार बटन दबाएंगे, नई शायरी आएगी।");
         });
     }
 </script>
