@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ऑल-इन-वन बधाई कार्ड</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body { 
+            text-align: center; background: #050510; color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 10px;
+        }
+        .container { max-width: 500px; margin: auto; }
+        
+        /* कार्ड डिजाइन */
+        .card-wrapper { padding: 5px; border-radius: 35px; margin-top: 20px; background: transparent; }
+        
+        .card {
+            padding: 30px; border-radius: 30px; min-height: 520px;
+            display: flex; flex-direction: column; justify-content: center;
+            border: 5px solid rgba(255,255,255,0.2);
+            box-shadow: 0 20px 45px rgba(0,0,0,0.7);
+            position: relative; transition: 0.5s;
+        }
+
+        #userPhoto {
+            width: 145px; height: 145px; border-radius: 50%;
+            border: 5px solid gold; object-fit: cover;
+            margin: 0 auto 15px; display: none;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+        }
+
+        h1 { font-size: 30px; margin: 10px 0; text-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
+        .shayari { font-size: 20px; line-height: 1.6; margin: 15px 0; font-weight: bold; }
+        .wishes { font-size: 16px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 15px; margin: 10px 0; }
+        .sender { font-size: 15px; margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.3); font-weight: bold; }
+
+        /* फॉर्म और बटन */
+        .controls { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); }
+        input, select, button { width: 95%; padding: 14px; margin: 8px 0; border-radius: 12px; border: none; font-size: 16px; }
+        
+        #photoInput { display: none; }
+        .custom-file-upload {
+            display: inline-block; width: 88%; padding: 14px;
+            background: #3498db; color: white; border-radius: 12px;
+            cursor: pointer; font-weight: bold; margin: 8px 0;
+        }
+
+        .gen-btn { background: #ff4757; color: white; font-weight: bold; cursor: pointer; }
+        .share-btn { background: #2ed573; color: white; font-weight: bold; display: none; margin-bottom: 50px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="controls">
+        <h2 style="color: #ffeb3b; margin: 0 0 15px 0;">✨ जादुई कार्ड मेकर ✨</h2>
+        <input type="text" id="toWhom" placeholder="किसके लिए? (उदा: ममता)">
+        <input type="text" id="fromWhom" placeholder="प्रेषक (आपका नाम)">
+        
+        <select id="festival">
+            <optgroup label="मुख्य त्योहार">
+                <option value="Holi">होली (Holi)</option>
+                <option value="Diwali">दिवाली (Diwali)</option>
+                <option value="RakshaBandhan">रक्षाबंधन (Raksha Bandhan)</option>
+                <option value="MahaShivratri">महाशिवरात्रि (Maha Shivratri)</option>
+                <option value="Janmashtami">जन्माष्टमी (Janmashtami)</option>
+                <option value="NewYear">नया साल (New Year)</option>
+            </optgroup>
+            <optgroup label="खुशियां और सेलिब्रेशन">
+                <option value="Birthday">जन्मदिन (Birthday)</option>
+                <option value="Anniversary">सालगिरह (Anniversary)</option>
+            </optgroup>
+            <optgroup label="Valentine's Special ❤️">
+                <option value="Valentine">वैलेंटाइन डे (Valentine's Day)</option>
+                <option value="RoseDay">रोज डे (Rose Day)</option>
+                <option value="ProposeDay">प्रपोज डे (Propose Day)</option>
+                <option value="KissDay">किस डे (Kiss Day)</option>
+                <option value="HugDay">हग डे (Hug Day)</option>
+            </optgroup>
+        </select>
+
+        <label for="photoInput" class="custom-file-upload">🖼️ फोटो चुनें</label>
+        <input type="file" id="photoInput" accept="image/*">
+        
+        <button class="gen-btn" onclick="generateCard()">कार्ड तैयार करें ✨</button>
+    </div>
+
+    <div id="captureArea" class="card-wrapper">
+        <div class="card" id="myCard" style="background: linear-gradient(135deg, #1e3c72, #2a5298);">
+            <img id="userPhoto" src="" alt="">
+            <div id="icon" style="font-size: 55px;">✨</div>
+            <h1 id="wishTitle">शुभकामनाएं!</h1>
+            <div class="shayari" id="shayariText">अपना कार्ड डिजाइन करें...</div>
+            <div class="wishes" id="extraWish">ढेर सारी खुशियां और प्यार! 🌹</div>
+            <div class="sender" id="senderName"></div>
+        </div>
+    </div>
+
+    <button class="share-btn" id="shareBtn" onclick="downloadCard()">📥 गैलरी में सेव करें</button>
+</div>
+
+<script>
+    const photoInput = document.getElementById('photoInput');
+    const userPhoto = document.getElementById('userPhoto');
+
+    photoInput.onchange = e => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = event => {
+                userPhoto.src = event.target.result;
+                userPhoto.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    function generateCard() {
+        let name = document.getElementById("toWhom").value;
+        let from = document.getElementById("fromWhom").value;
+        if (!name || !from) { alert("कृपया नाम और प्रेषक भरें!"); return; }
+
+        let toName = name + " जी";
+        let fest = document.getElementById("festival").value;
+        let card = document.getElementById("myCard");
+        let wishH1 = document.getElementById("wishTitle");
+        let shayariP = document.getElementById("shayariText");
+        let senderDiv = document.getElementById("senderName");
+        let iconDiv = document.getElementById("icon");
+
+        senderDiv.innerHTML = "प्रेषक: " + from + " जी";
+
+        // त्योहारों के हिसाब से डिजाइन
+        if (fest === "Holi") {
+            card.style.background = "linear-gradient(45deg, #ff4757, #ff9f43, #feca57)";
+            wishH1.innerText = "हैप्पी होली, " + toName;
+            shayariP.innerHTML = "रंगों की बौछार, अपनों का प्यार,<br>मुबारक हो आपको होली का त्योहार!";
+            iconDiv.innerText = "🎨🌈";
+        } else if (fest === "Diwali") {
+            card.style.background = "radial-gradient(circle, #2c3e50, #000000)";
+            card.style.color = "#f1c40f";
+            wishH1.innerText = "शुभ दीपावली, " + toName;
+            shayariP.innerHTML = "जगमग दीपों की चमक से रोशन हो संसार,<br>सुख-समृद्धि लाए आपके घर दिवाली का त्योहार!";
+            iconDiv.innerText = "🪔✨";
+        } else if (fest === "MahaShivratri") {
+            card.style.background = "linear-gradient(135deg, #2c3e50, #4ca1af)";
+            wishH1.innerText = "हर हर महादेव, " + toName;
+            shayariP.innerHTML = "शिव की शक्ति, शिव की भक्ति,<br>खुशियां लाए आपके जीवन में सुख-शांति!";
+            iconDiv.innerText = "🔱🕉️";
+        } else if (fest === "Janmashtami") {
+            card.style.background = "linear-gradient(to right, #000428, #004e92)";
+            wishH1.innerText = "जय श्री कृष्णा, " + toName;
+            shayariP.innerHTML = "माखन चोर नन्द किशोर, बांधी जिसने प्रीत की डोर,<br>हरे कृष्ण हरे मुरारी, पूजती जिन्हें दुनिया सारी!";
+            iconDiv.innerText = "🪈🍶";
+        } else if (fest === "RakshaBandhan") {
+            card.style.background = "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)";
+            wishH1.innerText = "हैप्पी रक्षाबंधन, " + toName;
+            shayariP.innerHTML = "कच्चे धागों से बनी पक्की डोर है राखी,<br>प्यार और विश्वास की मिसाल है राखी!";
+            iconDiv.innerText = "🎁👫";
+        } else if (fest === "Birthday") {
+            card.style.background = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+            wishH1.innerText = "जन्मदिन मुबारक, " + toName;
+            shayariP.innerHTML = "सूरज रोशनी लेकर आया, चिड़ियों ने गाना गाया,<br>फूलों ने हंस-हंसकर बोला, मुबारक हो आपका जन्मदिन आया!";
+            iconDiv.innerText = "🎂🎈";
+        } else if (fest === "Valentine") {
+            card.style.background = "linear-gradient(to top, #ff0844 0%, #ffb199 100%)";
+            wishH1.innerText = "Happy Valentine's Day, " + toName;
+            shayariP.innerHTML = "धड़कन मेरी तुमसे है, खुशबू मेरी तुमसे है,<br>कैसे कहें तुमसे, मेरी हर खुशी तुमसे है!";
+            iconDiv.innerText = "❤️🌹";
+        } else if (fest === "KissDay") {
+            card.style.background = "linear-gradient(135deg, #e91e63, #880e4f)";
+            wishH1.innerText = "Happy Kiss Day, " + toName;
+            shayariP.innerHTML = "बातें तो होती रहती हैं दिल की गहराइयों में,<br>कभी खामोशी को भी महसूस करो लबों की परछाइयों में!";
+            iconDiv.innerText = "💋✨";
+        } else if (fest === "RoseDay") {
+            card.style.background = "linear-gradient(45deg, #d4145a, #fbb03b)";
+            wishH1.innerText = "Happy Rose Day, " + toName;
+            shayariP.innerHTML = "फूल बनकर मुस्कुराना जिंदगी है,<br>मुस्कुरा के गम भुलाना जिंदगी है!";
+            iconDiv.innerText = "🌹🥰";
+        } else {
+            // Default New Year
+            card.style.background = "linear-gradient(135deg, #1e3c72, #2a5298)";
+            wishH1.innerText = "हैप्पी न्यू ईयर, " + toName;
+            shayariP.innerHTML = "बीते साल को विदा करें, नए का करें स्वागत,<br>दुआ है रब से, आप हमेशा रहें सलामत!";
+            iconDiv.innerText = "🎆🎆";
+        }
+
+        document.getElementById("shareBtn").style.display = "block";
+    }
+
+    function downloadCard() {
+        const area = document.getElementById("captureArea");
+        html2canvas(area, { 
+            scale: 2, 
+            backgroundColor: null, 
+            useCORS: true 
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'MagicCard.png';
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+            alert("कार्ड सेव हो गया! अब आप इसे WhatsApp पर ममता जी या किसी को भी भेज सकते हैं।");
+        });
+    }
+</script>
+
+</body>
+</html>
